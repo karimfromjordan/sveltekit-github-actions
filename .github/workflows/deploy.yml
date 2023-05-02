@@ -45,8 +45,7 @@ jobs:
 
       - name: Build chisel
         run: |
-          cd chisel-repo/cmd && ./mkversion.sh
-          cd chisel-repo && go build -o $(pwd) $(pwd)/cmd/chisel && mv chisel $GITHUB_WORKSPACE
+          cd chisel-repo && ./cmd/mkversion.sh && go build -o $(pwd) $(pwd)/cmd/chisel && mv chisel $GITHUB_WORKSPACE
           
       - name: Copy slices into container
         run: |

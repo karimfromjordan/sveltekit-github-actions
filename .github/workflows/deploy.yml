@@ -17,12 +17,12 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: canonical/chisel
-          path: chisel
+          path: chisel-repo
 
       - name: Build canonical/chisel
         run: |
-          cd $GITHUB_WORKSPACE/chisel/cmd && ./mkversion.sh
-          cd $GITHUB_WORKSPACE/chisel && go build -o $(pwd) $(pwd)/cmd/chisel && mv chisel $GITHUB_WORKSPACE
+          cd $GITHUB_WORKSPACE/chisel-repo/cmd && ./mkversion.sh
+          cd $GITHUB_WORKSPACE/chisel-repo && go build -o $(pwd) $(pwd)/cmd/chisel && mv chisel $GITHUB_WORKSPACE
 
       - name: Build systemd container
         run: |

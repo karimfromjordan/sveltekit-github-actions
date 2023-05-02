@@ -44,8 +44,7 @@ jobs:
           path: chisel-repo
 
       - name: Build chisel
-        run: |
-          cd chisel-repo && ./cmd/mkversion.sh && go build -o $(pwd) $(pwd)/cmd/chisel && mv chisel $GITHUB_WORKSPACE
+        run: cd chisel-repo && ./cmd/mkversion.sh && go build -o $(pwd) $(pwd)/cmd/chisel && mv chisel $GITHUB_WORKSPACE
           
       - name: Copy slices into container
         run: |
@@ -56,4 +55,4 @@ jobs:
         run: cp -r app-repo/{build,node_modules,package.json} container/opt/app
 
       - name: Copy node binary into container
-        run: cp $(which node) container/opt
+        run: cp $(which node) container/opt && ls -l container/opt

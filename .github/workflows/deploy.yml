@@ -28,6 +28,6 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE
           mkdir -p container/opt
-          chisel cut --root container ca-certificates_data libstdc++6_libs
+          ./chisel cut --root container ca-certificates_data libstdc++6_libs
           ls container
 

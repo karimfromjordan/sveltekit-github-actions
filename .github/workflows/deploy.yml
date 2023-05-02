@@ -1,11 +1,11 @@
 name: test-build-deploy
-run-name: Test, Build and Deploy app
+run-name: Test, Build and Deploy
 on:
   push:
     branches:
       - 'main'
 jobs:
-  build:
+  test:
     runs-on: ubuntu-22.04
     steps:
       - name: Install Node.js
@@ -20,13 +20,46 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: pnpx playwright install --with-deps
+
+      - name: Run Playwright tests
+        run: pnpm test
+
+      - uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+  build-and-deploy:
+    needs: [test]
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Checkout app
+        uses: actions/checkout@v3
         with:
           path: app-repo
 
-      - name: Install dependencies
+      - name: Install app dependencies
         run: cd app-repo && pnpm install --frozen-lockfile
 
-      - name: Build
+      - name: Build app
         run: cd app-repo && pnpm build
 
       - name: Delete development dependencies
@@ -70,4 +103,4 @@ jobs:
           touch container/etc/machine-id container/usr/lib/os-release
 
       - name: Compress container
-        run: mksquashfs container container.raw -exit-on-error -quiet -all-root ; ls -l
+        run: mksquashfs container "${GITHUB_REPOSITORY##*/}_$(date --utc '+%FT%H%M')".raw -exit-on-error -quiet -all-root

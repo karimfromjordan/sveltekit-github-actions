@@ -47,12 +47,27 @@ jobs:
         run: cd chisel-repo && ./cmd/mkversion.sh && go build -o $(pwd) $(pwd)/cmd/chisel && mv chisel $GITHUB_WORKSPACE
           
       - name: Copy slices into container
-        run: |
-          mkdir -p container/opt/app
-          ./chisel cut --root container ca-certificates_data libstdc++6_libs
+        run: mkdir -p container/opt/app && ./chisel cut --root container ca-certificates_data libstdc++6_libs
         
       - name: Copy app into container
         run: cp -r app-repo/{build,node_modules,package.json} container/opt/app
 
       - name: Copy node binary into container
-        run: cp $(which node) container/opt && ls -l container/opt
+        run: cp $(which node) container/opt
+
+      - name: Create container file structure
+        run: |
+          mkdir -p \
+            container/usr/lib \
+            container/etc/systemd/system \
+            container/proc \
+            container/sys \
+            container/dev \
+            container/run \
+            container/tmp \
+            container/var/tmp
+
+          touch container/etc/machine-id container/usr/lib/os-release
+
+      - name: Compress container
+        run: mksquashfs container container.raw -exit-on-error -quiet -all-root

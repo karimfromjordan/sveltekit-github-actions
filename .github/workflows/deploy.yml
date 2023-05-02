@@ -8,6 +8,29 @@ jobs:
   build:
     runs-on: ubuntu-22.04
     steps:
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Checkout
+        uses: actions/checkout@v3
+          path: app-repo
+
+      - name: Install dependencies
+        run: cd app-repo && pnpm install --frozen-lockfile
+
+      - name: Build
+        run: cd app-repo && pnpm build
+
+      - name: Delete development dependencies
+        run: cd app-repo && pnpm prune --prod
+
       - name: Install Golang
         uses: actions/setup-go@v4
         with:
@@ -19,15 +42,18 @@ jobs:
           repository: canonical/chisel
           path: chisel-repo
 
-      - name: Build canonical/chisel
+      - name: Build chisel
         run: |
-          cd $GITHUB_WORKSPACE/chisel-repo/cmd && ./mkversion.sh
-          cd $GITHUB_WORKSPACE/chisel-repo && go build -o $(pwd) $(pwd)/cmd/chisel && mv chisel $GITHUB_WORKSPACE
-
-      - name: Build systemd container
+          cd chisel-repo/cmd && ./mkversion.sh
+          cd chisel-repo && go build -o $(pwd) $(pwd)/cmd/chisel && mv chisel $GITHUB_WORKSPACE
+          
+      - name: Copy slices into container
         run: |
-          cd $GITHUB_WORKSPACE
-          mkdir -p container/opt
+          mkdir -p container/opt/app
           ./chisel cut --root container ca-certificates_data libstdc++6_libs
-          ls container
+        
+      - name: Copy app into container
+        run: cp -r app-repo/{build,node_modules,package.json} container/opt/app
 
+      - name: Copy node binary into container
+        run: cp $(which node) container/opt

@@ -70,4 +70,4 @@ jobs:
           touch container/etc/machine-id container/usr/lib/os-release
 
       - name: Compress container
-        run: mksquashfs container container.raw -exit-on-error -quiet -all-root
+        run: mksquashfs container container.raw -exit-on-error -quiet -all-root ; ls -l

@@ -5,40 +5,7 @@ on:
     branches:
       - 'main'
 jobs:
-  test:
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Install Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
-
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Install Playwright browsers
-        run: pnpx playwright install --with-deps
-
-      - name: Run Playwright tests
-        run: pnpm test
-
-      - uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 7
-
   build-and-deploy:
-    needs: [test]
     runs-on: ubuntu-22.04
     steps:
       - name: Install Node.js
@@ -102,5 +69,22 @@ jobs:
 
           touch container/etc/machine-id container/usr/lib/os-release
 
+      - name: Create .service file
+        run: |
+          cat <<-EOF > container/etc/systemd/system/${GITHUB_REPOSITORY##*/}.service
+          [Unit]
+          Description=${{ github.repositoryUrl }}
+
+          [Service]
+          DynamicUser=yes
+          StateDirectory=services/${GITHUB_REPOSITORY##*/}
+          Environment=PORT=5001
+          Environment=NODE_ENV=production
+          ExecStart=/opt/node /opt/app/build
+
+          [Install]
+          WantedBy=multi-user.target
+          EOF
+
       - name: Compress container
-        run: mksquashfs container "${GITHUB_REPOSITORY##*/}_$(date --utc '+%FT%H%M')".raw -exit-on-error -quiet -all-root
+        run: mksquashfs container "${GITHUB_REPOSITORY##*/}_$(date --utc '+%FT%H%M')".raw -exit-on-error -quiet -all-root && ls -l

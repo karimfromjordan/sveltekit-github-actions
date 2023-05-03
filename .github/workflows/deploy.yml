@@ -38,6 +38,7 @@ jobs:
           retention-days: 7
 
   build-and-deploy:
+    needs: [test]
     runs-on: ubuntu-22.04
     steps:
       - name: Install Node.js
@@ -88,18 +89,19 @@ jobs:
             container/dev \
             container/run \
             container/tmp \
-            container/var/tmp
+            container/var/tmp \
+            container/opt/app
 
           touch container/etc/machine-id container/usr/lib/os-release
 
       - name: Copy slices into container
-        run: mkdir -p container/opt/app && ./chisel cut --root container ca-certificates_data libstdc++6_libs
-
-      - name: Copy app into container
-        run: cp -r app-repo/{build,node_modules,package.json} container/opt/app
+        run: ./chisel cut --root container ca-certificates_data libstdc++6_libs
 
       - name: Copy node binary into container
         run: cp $(which node) container/opt
+
+      - name: Copy app into container
+        run: cp -r app-repo/{build,node_modules,package.json} container/opt/app
 
       - name: Create .service file
         run: |

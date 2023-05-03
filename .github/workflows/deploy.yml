@@ -82,15 +82,15 @@ jobs:
       - name: Create container file structure
         run: |
           mkdir -p \
-            container/usr/lib \
-            container/etc/systemd/system \
-            container/proc \
-            container/sys \
             container/dev \
+            container/etc/systemd/system \
+            container/opt/app \
+            container/proc \
             container/run \
+            container/sys \
             container/tmp \
-            container/var/tmp \
-            container/opt/app
+            container/usr/lib \
+            container/var/tmp
 
           touch container/etc/machine-id container/usr/lib/os-release
 
@@ -121,4 +121,11 @@ jobs:
           EOF
 
       - name: Compress container
-        run: mksquashfs container "${GITHUB_REPOSITORY##*/}_$(date --utc '+%F.%H%M')".raw -exit-on-error -quiet -all-root
+        run: |
+          mksquashfs \
+            container \
+            "${GITHUB_REPOSITORY##*/}_$(date --utc '+%F.%H%M')".raw \
+            -exit-on-error \
+            -quiet \
+            -all-root
+

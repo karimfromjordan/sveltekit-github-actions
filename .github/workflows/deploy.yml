@@ -37,8 +37,8 @@ jobs:
           path: playwright-report/
           retention-days: 7
 
-  build-and-deploy:
-    needs: [test]
+  build:
+    needs: test
     runs-on: ubuntu-22.04
     steps:
       - name: Install Node.js
@@ -128,4 +128,10 @@ jobs:
             -exit-on-error \
             -quiet \
             -all-root
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: container
+          path: *.raw
+          retention-days: 1
 

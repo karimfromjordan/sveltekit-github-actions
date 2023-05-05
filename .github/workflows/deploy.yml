@@ -131,3 +131,9 @@ jobs:
             -exit-on-error \
             -quiet \
             -all-root
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: container
+          path: '*.raw'
+          retention-days: 1

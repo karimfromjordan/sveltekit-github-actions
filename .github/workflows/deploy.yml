@@ -109,13 +109,12 @@ jobs:
           [Unit]
           Description=$GITHUB_REPOSITORY
           StartLimitBurst=5
-          StartLimitIntervalSec=120
+          StartLimitIntervalSec=60
 
           [Service]
           DynamicUser=yes
           StateDirectory=services/${GITHUB_REPOSITORY##*/}
-          Environment=PORT=5001
-          Environment=NODE_ENV=production
+          Environment=PORT=5001 NODE_ENV=production
           ExecStart=/opt/node /opt/app/build
           Restart=on-failure
 

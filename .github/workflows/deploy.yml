@@ -94,8 +94,8 @@ jobs:
             container/var/tmp
 
           touch \
-            container/etc/resolv.conf \
             container/etc/machine-id \
+            container/etc/resolv.conf \
             container/usr/lib/os-release
 
       - name: Copy slices into container

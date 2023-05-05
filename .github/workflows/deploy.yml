@@ -92,7 +92,10 @@ jobs:
             container/usr/lib \
             container/var/tmp
 
-          touch container/etc/machine-id container/usr/lib/os-release
+          touch \
+            container/etc/resolv.conf \
+            container/etc/machine-id \
+            container/usr/lib/os-release
 
       - name: Copy slices into container
         run: ./chisel cut --root container ca-certificates_data libstdc++6_libs

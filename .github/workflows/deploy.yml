@@ -37,7 +37,7 @@ jobs:
           path: playwright-report/
           retention-days: 5
 
-  build:
+  build-and-deploy:
     needs: test
     runs-on: ubuntu-22.04
     steps:
@@ -108,6 +108,8 @@ jobs:
           cat <<-EOF > container/etc/systemd/system/${GITHUB_REPOSITORY##*/}.service
           [Unit]
           Description=$GITHUB_REPOSITORY
+          StartLimitBurst=5
+          StartLimitIntervalSec=120
 
           [Service]
           DynamicUser=yes
@@ -115,6 +117,7 @@ jobs:
           Environment=PORT=5001
           Environment=NODE_ENV=production
           ExecStart=/opt/node /opt/app/build
+          Restart=on-failure
 
           [Install]
           WantedBy=multi-user.target
@@ -129,9 +132,10 @@ jobs:
             -quiet \
             -all-root
 
-      - uses: actions/upload-artifact@v3
-        with:
-          name: container
-          path: '*.raw'
-          retention-days: 1
+      - name: Setup SSH
+        run: |
+          
+        
+      - name: Copy container to server
+        run: 
 

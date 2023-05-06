@@ -37,7 +37,7 @@ jobs:
           path: playwright-report/
           retention-days: 5
 
-  build-and-deploy:
+  build:
     needs: test
     runs-on: ubuntu-22.04
     steps:
@@ -62,7 +62,7 @@ jobs:
       - name: Build app
         run: cd app-repo && pnpm build
 
-      - name: Delete development dependencies
+      - name: Delete app development dependencies
         run: cd app-repo && pnpm prune --prod
 
       - name: Install Golang
@@ -140,3 +140,29 @@ jobs:
           name: container
           path: '*.raw'
           retention-days: 1
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Install SSH key
+        run: |
+          install -m 600 -D /dev/null ~/.ssh/id_ed25519
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          ssh-keyscan -H s1.winter-rose.design > ~/.ssh/known_hosts
+
+      - name: Copy container to server
+        run: |
+          scp ${{ SSH_USER }}@s1.winter-rose.design:/
+          sudo mv ~/*.raw /var/lib/portables
+
+      - name: Start container
+        run: |
+          sudo portablectl \
+            --enable \
+            --now \
+            --profile=trusted \
+            container.raw
+
+      - name: Cleanup
+        run: rm -rf ~/.ssh

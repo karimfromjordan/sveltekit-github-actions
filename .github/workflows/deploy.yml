@@ -36,7 +36,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: chisel
-          key: chisel-${{ runner.os }}
+          key: chisel-${{ runner.os }}-${{ runner.arch }}
 
       - if: ${{ steps.cache-chisel.outputs.cache-hit != 'true' }}
         name: Install Golang
@@ -119,4 +119,3 @@ jobs:
           name: container
           path: '*.raw'
           retention-days: 1
-

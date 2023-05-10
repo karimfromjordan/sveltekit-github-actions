@@ -31,18 +31,28 @@ jobs:
       - name: Build app
         run: cd app-repo && pnpm build
 
-      - name: Install Golang
+      - name: Cache chisel
+        id: cache-chisel
+        uses: actions/cache@v3
+        with:
+          path: chisel
+          key: chisel- ${{ runner.os }} }}
+
+      - if: ${{ steps.cache-chisel.outputs.cache-hit != 'true' }}
+        name: Install Golang
         uses: actions/setup-go@v4
         with:
           go-version: 'stable'
 
-      - name: Checkout canonical/chisel
+      - if: ${{ steps.cache-chisel.outputs.cache-hit != 'true' }}
+        name: Checkout canonical/chisel
         uses: actions/checkout@v3
         with:
           repository: canonical/chisel
           path: chisel-repo
 
-      - name: Build chisel
+      - if: ${{ steps.cache-chisel.outputs.cache-hit != 'true' }}
+        name: Build chisel
         run: cd chisel-repo && ./cmd/mkversion.sh && go build -o $(pwd) $(pwd)/cmd/chisel && mv chisel $GITHUB_WORKSPACE
 
       - name: Create container file structure
@@ -67,7 +77,7 @@ jobs:
       - name: Copy slices into container
         run: ./chisel cut --root container ca-certificates_data libstdc++6_libs
 
-      - name: Copy node binary into container
+      - name: Copy Node.js binary into container
         run: cp $(which node) container/opt
 
       - name: Copy app into container

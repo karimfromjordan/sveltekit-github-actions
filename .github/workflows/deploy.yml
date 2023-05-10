@@ -1,5 +1,5 @@
-name: test-build-deploy
-run-name: Test, Build and Deploy
+name: build
+run-name: Build systemd portable service
 on:
   push:
     branches:

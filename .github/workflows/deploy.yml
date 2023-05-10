@@ -25,14 +25,11 @@ jobs:
           cache: 'pnpm'
           cache-dependency-path: '**/pnpm-lock.yaml'
 
-      - name: Install app dependencies
-        run: cd app-repo && pnpm install --frozen-lockfile
+      - name: Install development dependencies
+        run: cd app-repo && pnpm install --frozen-lockfile --dev
 
       - name: Build app
         run: cd app-repo && pnpm build
-
-      - name: Delete app development dependencies
-        run: cd app-repo && pnpm prune --prod
 
       - name: Install Golang
         uses: actions/setup-go@v4
@@ -74,7 +71,10 @@ jobs:
         run: cp $(which node) container/opt
 
       - name: Copy app into container
-        run: cp -r app-repo/{build,node_modules,package.json} container/opt/app
+        run: cp -r app-repo/{build,package.json,pnpm-lock.yaml} container/opt/app
+
+      - name: Install production dependencies
+        run: cd container/opt/app && pnpm install --frozen-lockfile --prod
 
       - name: Create .service file
         run: |
